@@ -18,7 +18,7 @@ if uploaded_file is not None:
 
         # Remove duplicate columns
         df = df.loc[:, ~df.columns.duplicated()]
-        st.write("Columns after removing duplicates:", df.columns.tolist())
+        st.write("Uploaded Dataset Columns (after removing duplicates):", df.columns.tolist())
 
         # Rename columns to match the required names
         column_mapping = {
