@@ -68,5 +68,12 @@ if uploaded_file is not None:
 
                 st.write("Cluster Centers:")
                 st.write(pd.DataFrame(kmeans.cluster_centers_, columns=["Latitude", "Longitude"]))
+
+            # Check for alternative columns if 'Primary Type' is not available
+            if 'Murder' in df.columns and 'Rape' in df.columns:
+                st.write("Using alternative crime columns: Murder, Rape, etc.")
+                # Perform analysis based on these columns
+            else:
+                st.error("The dataset does not contain the required columns or alternatives.")
     except Exception as e:
         st.error(f"An error occurred: {e}")
