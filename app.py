@@ -14,7 +14,11 @@ if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
 
         # Debugging: Display uploaded dataset columns
-        st.write("Uploaded Dataset Columns:", df.columns.tolist())
+        st.write("Uploaded Dataset Columns (before removing duplicates):", df.columns.tolist())
+
+        # Remove duplicate columns
+        df = df.loc[:, ~df.columns.duplicated()]
+        st.write("Columns after removing duplicates:", df.columns.tolist())
 
         # Rename columns to match the required names
         column_mapping = {
