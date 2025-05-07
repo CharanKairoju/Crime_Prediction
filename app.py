@@ -20,7 +20,7 @@ if uploaded_file is not None:
     st.write(df.columns)
     st.subheader("Crime Statistics")
     st.write("Total crimes:", len(df))
-    st.write("Crime Types:", df['Primary Type'].value_counts().head())
+    st.write("Crime Types:", df['Offense_Type'].value_counts().head())
 
     st.subheader("Heatmap of High-Crime Locations")
     if 'Latitude' in df.columns and 'Longitude' in df.columns:
