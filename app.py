@@ -1,8 +1,8 @@
-import pandas as pd # type: ignore
-import streamlit as st # type: ignore
-import seaborn as sns # type: ignore
-import matplotlib.pyplot as plt # type: ignore
-from sklearn.cluster import KMeans # type: ignore
+import pandas as pd  # type: ignore
+import streamlit as st  # type: ignore
+import seaborn as sns  # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
+from sklearn.cluster import KMeans  # type: ignore
 
 st.set_page_config(page_title="Crime Prediction System", layout="wide")
 st.title("🕵️ Crime Prediction and Prevention Dashboard")
@@ -10,29 +10,49 @@ st.title("🕵️ Crime Prediction and Prevention Dashboard")
 uploaded_file = st.file_uploader("Upload Crime Dataset (CSV)", type=["csv"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+    try:
+        df = pd.read_csv(uploaded_file)
 
-    st.subheader("Raw Data")
-    st.dataframe(df.head())
-    st.write("First few rows of your DataFrame:")
-    st.write(df.head())
-    st.write("Column names in your DataFrame:")
-    st.write(df.columns)
-    st.subheader("Crime Statistics")
-    st.write("Total crimes:", len(df))
-    st.write("Crime Types:", df['Offense_Type'].value_counts().head())
+        # Check for required columns
+        required_columns = ['Primary Type', 'Latitude', 'Longitude']
+        if not all(col in df.columns for col in required_columns):
+            st.error(f"The dataset must contain the following columns: {', '.join(required_columns)}")
+        else:
+            # Data Cleaning: Drop rows with missing values in required columns
+            df = df.dropna(subset=required_columns)
 
-    st.subheader("Heatmap of High-Crime Locations")
-    if 'Latitude' in df.columns and 'Longitude' in df.columns:
-        fig, ax = plt.subplots()
-        sns.kdeplot(x=df["Longitude"], y=df["Latitude"], cmap="Reds", fill=True, ax=ax)
-        st.pyplot(fig)
+            st.subheader("Raw Data")
+            st.dataframe(df.head())
+            st.write("First few rows of your DataFrame:")
+            st.write(df.head())
+            st.write("Column names in your DataFrame:")
+            st.write(df.columns)
 
-    st.subheader("Predict Crime Hotspots (KMeans Clustering)")
-    if 'Latitude' in df.columns and 'Longitude' in df.columns:
-        kmeans = KMeans(n_clusters=5)
-        df['Cluster'] = kmeans.fit_predict(df[['Latitude', 'Longitude']])
-        st.map(df[['Latitude', 'Longitude']])
+            st.subheader("Crime Statistics")
+            st.write("Total crimes:", len(df))
+            st.write("Crime Types:", df['Primary Type'].value_counts().head())
 
-        st.write("Cluster Centers:")
-        st.write(pd.DataFrame(kmeans.cluster_centers_, columns=["Latitude", "Longitude"]))
+            st.subheader("Heatmap of High-Crime Locations")
+            if 'Latitude' in df.columns and 'Longitude' in df.columns:
+                fig, ax = plt.subplots()
+                sns.kdeplot(
+                    x=df["Longitude"], y=df["Latitude"], cmap="Reds", fill=True, ax=ax
+                )
+                ax.set_title("Heatmap of High-Crime Locations")
+                ax.set_xlabel("Longitude")
+                ax.set_ylabel("Latitude")
+                st.pyplot(fig)
+
+            st.subheader("Predict Crime Hotspots (KMeans Clustering)")
+            cluster_count = st.slider("Select Number of Clusters", min_value=2, max_value=10, value=5)
+            if 'Latitude' in df.columns and 'Longitude' in df.columns:
+                kmeans = KMeans(n_clusters=cluster_count, random_state=42)
+                df['Cluster'] = kmeans.fit_predict(df[['Latitude', 'Longitude']])
+
+                # Map visualization with clusters
+                st.map(df[['Latitude', 'Longitude']])
+
+                st.write("Cluster Centers:")
+                st.write(pd.DataFrame(kmeans.cluster_centers_, columns=["Latitude", "Longitude"]))
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
