@@ -42,12 +42,16 @@ if uploaded_file is not None:
             st.write("Column names in your DataFrame:")
             st.write(df.columns)
 
-            st.subheader("Crime Statistics")
-            st.write("Total crimes:", len(df))
-            st.write("Crime Types:", df['Primary Type'].value_counts().head())
+            if 'Primary Type' in df.columns:
+                st.subheader("Crime Statistics")
+                st.write("Total crimes:", len(df))
+                st.write("Crime Types:", df['Primary Type'].value_counts().head())
+            else:
+                st.error("The dataset does not contain the 'Primary Type' column.")
 
-            st.subheader("Heatmap of High-Crime Locations")
             if 'Latitude' in df.columns and 'Longitude' in df.columns:
+                # Perform heatmap and clustering
+                st.subheader("Heatmap of High-Crime Locations")
                 fig, ax = plt.subplots()
                 sns.kdeplot(
                     x=df["Longitude"], y=df["Latitude"], cmap="Reds", fill=True, ax=ax
@@ -57,9 +61,8 @@ if uploaded_file is not None:
                 ax.set_ylabel("Latitude")
                 st.pyplot(fig)
 
-            st.subheader("Predict Crime Hotspots (KMeans Clustering)")
-            cluster_count = st.slider("Select Number of Clusters", min_value=2, max_value=10, value=5)
-            if 'Latitude' in df.columns and 'Longitude' in df.columns:
+                st.subheader("Predict Crime Hotspots (KMeans Clustering)")
+                cluster_count = st.slider("Select Number of Clusters", min_value=2, max_value=10, value=5)
                 kmeans = KMeans(n_clusters=cluster_count, random_state=42)
                 df['Cluster'] = kmeans.fit_predict(df[['Latitude', 'Longitude']])
 
@@ -68,6 +71,8 @@ if uploaded_file is not None:
 
                 st.write("Cluster Centers:")
                 st.write(pd.DataFrame(kmeans.cluster_centers_, columns=["Latitude", "Longitude"]))
+            else:
+                st.error("The dataset does not contain 'Latitude' and 'Longitude' columns. Heatmap and clustering cannot be performed.")
 
             # Check for alternative columns if 'Primary Type' is not available
             if 'Murder' in df.columns and 'Rape' in df.columns:
@@ -77,3 +82,5 @@ if uploaded_file is not None:
                 st.error("The dataset does not contain the required columns or alternatives.")
     except Exception as e:
         st.error(f"An error occurred: {e}")
+else:
+    st.info("Please upload a dataset with the following columns: 'Primary Type', 'Latitude', 'Longitude'.")
