@@ -16,6 +16,14 @@ if uploaded_file is not None:
         # Debugging: Display uploaded dataset columns
         st.write("Uploaded Dataset Columns:", df.columns.tolist())
 
+        # Rename columns to match the required names
+        column_mapping = {
+            'Murder': 'Primary Type',  # Example mapping
+            'LatitudeColumn': 'Latitude',  # Replace with the actual column name for latitude
+            'LongitudeColumn': 'Longitude'  # Replace with the actual column name for longitude
+        }
+        df.rename(columns=column_mapping, inplace=True)
+
         # Check for required columns
         required_columns = ['Primary Type', 'Latitude', 'Longitude']
         if not all(col in df.columns for col in required_columns):
