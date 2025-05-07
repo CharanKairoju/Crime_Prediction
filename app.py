@@ -13,10 +13,16 @@ if uploaded_file is not None:
     try:
         df = pd.read_csv(uploaded_file)
 
+        # Debugging: Display uploaded dataset columns
+        st.write("Uploaded Dataset Columns:", df.columns.tolist())
+
         # Check for required columns
         required_columns = ['Primary Type', 'Latitude', 'Longitude']
         if not all(col in df.columns for col in required_columns):
-            st.error(f"The dataset must contain the following columns: {', '.join(required_columns)}")
+            st.error(
+                f"The dataset must contain the following columns: {', '.join(required_columns)}. "
+                f"Uploaded columns: {', '.join(df.columns)}"
+            )
         else:
             # Data Cleaning: Drop rows with missing values in required columns
             df = df.dropna(subset=required_columns)
